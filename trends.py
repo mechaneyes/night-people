@@ -6,11 +6,13 @@
 This script fetches the current trending topics locations and displays the trends for the location the user selected.
 """
 
-from _common import get_api
+# from _common import get_api
 import tweetpony
+import json
 
 def main():
-	api = get_api()
+	# api = get_api()
+	api = tweetpony.API(consumer_key = "4o10vDyMXhfe0gIJ14MjqoLXV", consumer_secret = "AARVla4sw6i9UWhZ5DcTEFMFfLe9lAw8KhCLbYsFLmsfe1OZWj", access_token = "1717921-t9izvcoRVbPo0AZXSUz99iXFEIWj4857VQm2ARGLPW", access_token_secret = "u6h8nxncBxoyohd31sDImuQ2cbwlBfyyLFvsWwghqOq9K")
 	if not api:
 		return
 	try:
@@ -23,7 +25,8 @@ def main():
 			print "%(woeid)i %(name)s" % location
 		else: # Town (7) or other place type
 			print "%(woeid)i %(name)s, %(country)s" % location
-	selected_id = raw_input("Enter the number of the region you want to see the trends for: ")
+	# selected_id = raw_input("Enter the number of the region you want to see the trends for: ")
+	selected_id = 2459115
 	try:
 		selected_trends = api.trends(id = selected_id)
 	except tweetpony.APIError as err:
@@ -33,6 +36,10 @@ def main():
 		print "=" * 25
 		for trend in selected_trends:
 			print trend.name
+			# with open('data.txt', 'w') as outfile:
+			# 	json.dump(trend.name, outfile)
+		with open('trends.json', 'w') as outfile:
+			json.dump(selected_trends, outfile, indent = 4)
 
 if __name__ == "__main__":
 	main()

@@ -8,29 +8,27 @@
 		<!-- <link rel="stylesheet" type="text/css" href="http://reset5.googlecode.com/hg/reset.min.css"> -->
 	</head>
 	<style type="text/css">
-		#target{position:relative;}
-		#target img{position:absolute;z-index:1}
-		#target img.active{z-index:3}
+		#target ul {position:relative;}
+		#target li {position:absolute;z-index:1}
+		#target li.active {z-index:3}
+		li {list-style-type: none;}
 	</style>
 <body>
 
 
 
 <div id="target">
-	<img class="active" src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10832005_1759608374263600_1476312208_n.jpg" />
-	<img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10838761_1570698933141603_1416626368_n.jpg" />
-	<img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10843954_1515333188725015_1392943770_n.jpg" />
-	<!-- <img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10853016_802261253168463_1829333981_n.jpg" />
-	<img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10832005_1759608374263600_1476312208_n.jpg" />
-	<img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10838761_1570698933141603_1416626368_n.jpg" />
-	<img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10843954_1515333188725015_1392943770_n.jpg" /> -->
+	<ul>
+		<li class="active"><img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10832005_1759608374263600_1476312208_n.jpg" /></li>
+		<li><img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10843954_1515333188725015_1392943770_n.jpg" /></li>
+	</ul>
 </div>
 
 
 <script type="text/javascript">
 function cycleImages(){
 	var $active = $('#target .active');
-	var $next = ($active.next().length > 0) ? $active.next() : $('#target img:first');
+	var $next = ($active.next().length > 0) ? $active.next() : $('#target li:first');
 	$next.css('z-index',2);//move the next image up the pile
 	$active.fadeOut(1500,function(){//fade out the top image
 		$active.css('z-index',1).show().removeClass('active');//reset the z-index and unhide the image
@@ -42,17 +40,41 @@ function cycleImages(){
 
 <script type="text/javascript">
 	$(document).ready(function() {
+
+		var cleanTrend = '';
+
+		// PULLING TRENDING TOPICS FROM TWITTER VIA trends.json
+		// -
+		// -
+		// -
+		$.getJSON("trends.json", function(raw) {
+		// console.log(json);
+		// console.log(raw.trends[0].name);
+		
+		$.each(raw.trends, function(key, value) {
+			// console.log(key + ": " + value.name);
+
+			var trend = value.name;
+			cleanTrend = trend.replace('#', '');
+			cleanTrend = cleanTrend.replace(' ', '');
+			// console.log(cleanTrend);
+			console.log(typeof cleanTrend);
+		});
+
+
 		var tag = "bmx";
 			tag = "selfie";
+			tag = "ICantBreathe";
+			tag = cleanTrend;
 		var count = 1;
 		var access_token = '231040019.00106e2.b76074d997574b68a344b0a24f64bddc';
 		var access_parameters = {access_token:access_token};
 		var collection = ['init'];
 
+
 		function grabImages(access_parameters) {
 		
 			var instagramUrl = 'https://api.instagram.com/v1/tags/' + tag + '/media/recent?callback=?&count='+ count;
-			// var instagramUrl = 'https://api.instagram.com/v1/tags/cat/media/recent?callback=?&count='+ count;
 			$.getJSON(instagramUrl, access_parameters, onDataLoaded);
 		
 		}
@@ -93,10 +115,7 @@ function cycleImages(){
 
 		function onDataLoaded(instagram_data) {
 		    
-		    var target = $("#target");
-		    // var collection = ['init'];
-		    // console.log('instagram_data: ' + instagram_data);
-
+		    var target = $("#target ul");
 		    
 		    if (instagram_data.meta.code == 200) {
 
@@ -129,7 +148,7 @@ function cycleImages(){
 		                	// console.log('newness');
 		                	collection.unshift(existingPhoto);
 		                	// target.append('<img src="' + photo.images.thumbnail.url + '">');
-		                	target.append('<img src="' + photo.images.standard_resolution.url + '">');
+		                	target.append('<li><img src="' + photo.images.standard_resolution.url + '"></li>');
 		                }
 
 		                console.log('collection.length: ' + collection.length);
@@ -145,15 +164,9 @@ function cycleImages(){
 		                }
 
 		                if (collection.length >= 10) {
-		                	$('img').first().remove();
+		                	$('li').first().remove();
 		                	collection.pop();
 		                }
-
-		                console.log('');
-
-
-
-		                // target.prepend('<a href="' + photo.link + '"><img src="' + photo.images.thumbnail.url + '"></a>')
 		            }
 
 				} else {
@@ -170,7 +183,7 @@ function cycleImages(){
 
 		setInterval(function() {
 			grabImages(access_parameters);
-		}, 5000);
+		}, 2000);
 		setInterval(function() {
 			cycleImages();
 		}, 4000);
@@ -181,6 +194,9 @@ function cycleImages(){
 		// 		$('img').first().addClass('active');
 		// 	}
 		// }, 5500);
+
+		// console.log('cleanTrend: ' + cleanTrend);
+	});
 
 
 	});
