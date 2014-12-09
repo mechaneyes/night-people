@@ -7,69 +7,87 @@
 		</script>
 		<!-- <link rel="stylesheet" type="text/css" href="http://reset5.googlecode.com/hg/reset.min.css"> -->
 	</head>
+	<style type="text/css">
+		#target ul {position:relative;}
+		#target li {position:absolute;z-index:1}
+		#target li.active {z-index:3}
+		li {list-style-type: none;}
+	</style>
 <body>
 
 
 
-<div id="target"></div>
+<div id="target">
+	<ul>
+		<li class="active"><img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10832005_1759608374263600_1476312208_n.jpg" /></li>
+		<li><img src="http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10843954_1515333188725015_1392943770_n.jpg" /></li>
+	</ul>
+</div>
 
+
+<!-- <script src="parsing.js"></script> -->
 
 <script type="text/javascript">
+function cycleImages(){
+	var $active = $('#target .active');
+	var $next = ($active.next().length > 0) ? $active.next() : $('#target li:first');
+	$next.css('z-index',2);//move the next image up the pile
+	$active.fadeOut(1500,function(){//fade out the top image
+		$active.css('z-index',1).show().removeClass('active');//reset the z-index and unhide the image
+		$next.css('z-index',3).addClass('active');//make the next image the top one
+	});
+}
+</script>
+
+<script type="text/javascript">
+
+	var cleanTrend = 'sux';
+
 	$(document).ready(function() {
+
 		var tag = "bmx";
+		// var cleanTrend;
+
+		// $.getScript("parsing.js", function(){
+		// 	console.log("Script loaded and executed.");
+		// 	// randomTrend();
+		// 	console.log('cleanerTrend: ' + cleanTrend);
+		// });
+
+		// $.getScript( "parsing.js", function() {
+		// });
+
+		$.ajax({
+		  type: "GET",
+		  url: "parsing.js",
+		  dataType: "script",
+		  async: false,
+		  success: function() {
+		  	console.log('cleanThree: ' + cleanTrend);
+		  }
+		});
+
+
+		tag = "selfie";
+		tag = cleanTrend;
+		console.log('cleanTrendToo: ' + cleanTrend);
 		var count = 1;
 		var access_token = '231040019.00106e2.b76074d997574b68a344b0a24f64bddc';
 		var access_parameters = {access_token:access_token};
 		var collection = ['init'];
 
+
 		function grabImages(access_parameters) {
 		
 			var instagramUrl = 'https://api.instagram.com/v1/tags/' + tag + '/media/recent?callback=?&count='+ count;
-			// var instagramUrl = 'https://api.instagram.com/v1/tags/cat/media/recent?callback=?&count='+ count;
 			$.getJSON(instagramUrl, access_parameters, onDataLoaded);
 		
 		}
 
-		// function onDataLoaded(access_parameters) {
-		//   // instagram_data.meta is where the secret messages from Instagram live
-		//   // and instagram_data.meta.code holds the status code of the request
-		//   // 404 means nothing was found, and 200 means everything is all good so...
-
-		//   if (instagram_data.meta.code == 200) {
-		//     // create a variable that holds all returned payload
-		//     var photos = instagram_data.data;
-
-		//     //as long as that variable holds data (does not = ) then...
-
-		//     if (photos.length > 0) {
-		//       //since there are multiple objects in the payload we have
-		//       //to create a loop
-		//       for (var key in photos ) {
-		//         //we create a variable for one object
-		//         var photo = photos[key];
-		//         //then we create and append to the DOM an  element in jQuery
-		//         //the source of which is the thumbnail of the photo
-		//         $('#target').append('');
-		//         console.log('loaded');
-		//       }
-		//     } else if {
-		//       //if the photos variable doesn’t hold data
-		//       $('#target').append("Hmm.  I couldn’t find anything!");
-		//     } else {
-		//       //if we didn’t get a 200 (success) request code from instagram
-		//       //then we display instagram’s error message instagram
-		//       var error = data.meta.error_message;
-		//       $('#target').append('Something happened, Instagram said: ' + error);
-		//   	}
-		//   }
-		// }
 
 		function onDataLoaded(instagram_data) {
 		    
-		    var target = $("#target");
-		    // var collection = ['init'];
-		    // console.log('instagram_data: ' + instagram_data);
-
+		    var target = $("#target ul");
 		    
 		    if (instagram_data.meta.code == 200) {
 
@@ -83,26 +101,17 @@
 
 		                // console.log(photo.hasOwnProperty('filter'));
 		                // console.log(photo); // Use to check all the properties of the photo object
-		                // console.log('photo.id: ' + photo.id);
 
 		                var existingPhoto = photo.id;
-		                console.log('existingPhoto: ' + existingPhoto);
-
-		                // var collection = [];
-		                // collection.unshift(existingPhoto);
-		                console.log('collection[0]: ' + collection[0]);
-		                console.log('collection[1]: ' + collection[1]);
-		                // console.log('collection[] : ' + collection);
-
 
 		                if (collection[0] == existingPhoto) {
 		                	// If the image being checked is the same as the existing one, keep moving
 		                	// console.log('sameness');
 
 		                } else {
-		                	console.log('newness');
+		                	// console.log('newness');
 		                	collection.unshift(existingPhoto);
-		                	target.prepend('<img src="' + photo.images.thumbnail.url + '">');
+		                	target.append('<li><img src="' + photo.images.standard_resolution.url + '"></li>');
 		                }
 
 		                console.log('collection.length: ' + collection.length);
@@ -111,21 +120,16 @@
 		                	// existingPhoto = collection.pop();
 		                	// console.log('pOpper: ' + collection.pop());
 		                	// var laster = $('img').last().css('border', '5px solid red');
-		                	var laster = $('img').last();
-		                	console.log('laster ' + laster);
-		                	target.prepend(laster);
+
+		                	// var laster = $('img').last();
+		                	// console.log('laster ' + laster);
+		                	// target.prepend(laster);
 		                }
 
-		                if (collection.length >= 12) {
-		                	$('img').last().remove();
+		                if (collection.length >= 10) {
+		                	$('li').first().remove();
 		                	collection.pop();
 		                }
-
-		                console.log('');
-
-
-
-		                // target.prepend('<a href="' + photo.link + '"><img src="' + photo.images.thumbnail.url + '"></a>')
 		            }
 
 				} else {
@@ -142,9 +146,17 @@
 
 		setInterval(function() {
 			grabImages(access_parameters);
-		}, 1500);
-
-
+		}, 2000);
+		setInterval(function() {
+			cycleImages();
+		}, 4000);
+		// setInterval(function() {
+		// 	// if ($("img:not(.active)")) {
+		// 	if ($('.active').length > 0) {
+		// 		console.log('not active');
+		// 		$('img').first().addClass('active');
+		// 	}
+		// }, 5500);
 	});
 </script>
 
